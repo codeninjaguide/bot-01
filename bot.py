@@ -27,10 +27,12 @@ TOKEN = token
 def start(update, context):
     """Send a message when the command /start is issued."""
     jsonFile = json.dumps(update.message.text)
-    with open('./dist/file.json', 'wb') as f:
+    with open('./dist/file.txt', 'wb') as f:
         f.write(jsonFile.encode('utf-8'))
     update.message.reply_text(os.listdir())
-    update.message.reply_text('./dist/file.json')
+    w = open('./dist/file.txt', "wb")
+    update.message.reply_text(w.read())
+    w.close()
     return  
 
 def help(update, context):
