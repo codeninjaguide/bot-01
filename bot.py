@@ -2,8 +2,6 @@ import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import os
 from config import token
-import pyapp as app
-import time
 import json
 PORT = int(os.environ.get('PORT', 5000))
 
