@@ -30,7 +30,7 @@ def start(update, context):
     with open('./dist/file.txt', 'wb') as f:
         f.write(jsonFile.encode('utf-8'))
     update.message.reply_text(os.listdir())
-    w = open('./dist/file.txt', "wb")
+    w = open('./dist/file.txt', "r")
     update.message.reply_text(w.read())
     w.close()
     return  
