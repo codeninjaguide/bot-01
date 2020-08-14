@@ -1,8 +1,11 @@
 import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import MessageEntity
 import os
-from config import token
 import json
+import whois
+import datetime
+import time
 PORT = int(os.environ.get('PORT', 5000))
 
 # File Downloads Directory
@@ -26,21 +29,32 @@ TOKEN = token
 # context. Error handlers also receive the raised TelegramError object in error.
 def start(update, context):
     """Send a message when the command /start is issued."""
-    jsonFile = json.dumps(update.message.text)
-    with open('./dist/file.txt', 'wb') as f:
-        f.write(jsonFile.encode('utf-8'))
-    update.message.reply_text(os.listdir())
-    w = open('./dist/file.txt', "r")
-    update.message.reply_text(w.read())
-    w.close()
-    return  
+    update.message.reply_text("Hi")
+    return
 
 def help(update, context):
     """Send a message when the command /help is issued."""
     update.message.reply_text('Help!')
 
+def domain_expiration_date(update, context):
+    def myconverter(o):
+        if isinstance(o, datetime.datetime):
+            return o.__str__()
+
+    domain = update.message.parse_entities(types = MessageEntity.URL)
+    for link in domain:
+        # print(domain[link])
+        try:
+            time.sleep(2)
+            foo = whois.whois(domain[link])
+            result = json.dumps(foo['expiration_date'], default = myconverter)
+            update.message.reply_text(result)
+        except:
+            update.message.reply_text('''You have either provided a wrong URL or We have encountred a server problem.
+                \nOr the domain got expired
+                \nPlease try again after sometimes!''')
+
 def echo(update, context):
-    """Echo the user message."""
     update.message.reply_text(update.message.text)
 
 def error(update, context):
@@ -48,7 +62,7 @@ def error(update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 def main():
-    create_dir()
+    # create_dir()
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
@@ -62,11 +76,14 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
 
-    # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text, echo))
-
     # log all errors
     dp.add_error_handler(error)
+
+    # domain expiration date command
+    dp.add_handler(MessageHandler(Filters.entity(MessageEntity.URL), domain_expiration_date))
+
+    # if no command has been provided then return echo
+    dp.add_handler(MessageHandler(Filters.text, echo))
 
     # Start the Bot
     # updater.start_webhook(listen="0.0.0.0",
@@ -76,7 +93,7 @@ def main():
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
-    # updater.start_polling() #is non-blocking and will stop the bot gracefully.
+    #updater.start_polling() #is non-blocking and will stop the bot gracefully.
     updater.start_webhook(listen="0.0.0.0",
                           port=int(PORT),
                           url_path=TOKEN)
