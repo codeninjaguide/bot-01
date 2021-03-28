@@ -6,6 +6,12 @@ import json
 import whois
 import datetime
 import time
+#pttest scrape date of examination
+from bs4 import BeautifulSoup
+import re
+import requests as r
+#pttest end
+
 PORT = int(os.environ.get('PORT', 5000))
 
 # File Downloads Directory
@@ -17,6 +23,17 @@ def create_dir():
         return
     print("Dir already exists!")
     return
+
+#Pttest scrape
+def pttest_scrape():
+    pattern = "[a-zA-Z]+\s+\d{1,2}[-]\d{1,2}[,]\s+\d{2,4}"
+    URL = "https://pttest.icai.org/"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'
+    }
+    response = r.get(URL, headers=headers).text
+    findDate = re.findall(pattern, response)
+    return findDate[0]
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -34,7 +51,13 @@ def start(update, context):
 
 def help(update, context):
     """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')
+    update.message.reply_text('1. /pttest for ICAI examination.\n 2. Provide full domain to check domain expiry date.\n')
+    
+def pttest(update, context):
+    """Send a message when the command /pttest is issued."""
+    temp = pttest_scrape()
+    text = "The date of next examination of ICAI Pttest is {}".format(temp)
+    update.message.reply_text()
 
 def domain_expiration_date(update, context):
     def myconverter(o):
@@ -75,6 +98,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("pttest", help))
 
     # log all errors
     dp.add_error_handler(error)
