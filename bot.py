@@ -7,7 +7,6 @@ import whois
 import datetime
 import time
 #pttest scrape date of examination
-from bs4 import BeautifulSoup
 import re
 import requests as r
 #pttest end
