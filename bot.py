@@ -56,7 +56,7 @@ def pttest(update, context):
     """Send a message when the command /pttest is issued."""
     temp = pttest_scrape()
     text = "The date of next examination of ICAI Pttest is {}".format(temp)
-    update.message.reply_text()
+    update.message.reply_text(text)
 
 def domain_expiration_date(update, context):
     def myconverter(o):
