@@ -9,6 +9,7 @@ import time
 #pttest scrape date of examination
 import re
 import requests as r
+from bs4 import BeautifulSoup
 #pttest end
 
 PORT = int(os.environ.get('PORT', 5000))
@@ -25,14 +26,21 @@ def create_dir():
 
 #Pttest scrape
 def pttest_scrape():
-    pattern = "[a-zA-Z]+\s+\d{1,2}[-]\d{1,2}[,]\s+\d{2,4}"
-    URL = "https://pttest.icai.org/"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'
+    t = r.get('https://pttest.icai.org/')
+    soup = BeautifulSoup(t.text, "html.parser")
+    data = soup.find_all("div", {"class": "candidate-advise-details"})[0].find_all('p')[1].text
+    return data
+
+def mediaFireDownload():
+    link = "http://www.mediafire.com/file/v155o0i1n5frt86/Mecha_Cue_Set_Offers_Backup_By_Abdullah_xD.zip/file"
+    header = {
+    'UserAgent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'
     }
-    response = r.get(URL, headers=headers).text
-    findDate = re.findall(pattern, response)
-    return findDate[0]
+    content = r.get(link, headers=header)
+    soup = BeautifulSoup(content.text, "html.parser")
+    download_link = soup.find_all("a", {"class": "input popsok"})
+    return download_link[0]['href']
+
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -50,12 +58,18 @@ def start(update, context):
 
 def help(update, context):
     """Send a message when the command /help is issued."""
-    update.message.reply_text('1. /pttest for ICAI examination.\n 2. Provide full domain to check domain expiry date.\n')
+    update.message.reply_text('1. /pttest for ICAI examination.\n 2. Provide full domain to check domain expiry date.\n 3. /mediafire followed by link to grab direct download link')
     
 def pttest(update, context):
     """Send a message when the command /pttest is issued."""
     temp = pttest_scrape()
     text = "The date of next examination of ICAI Pttest is {}".format(temp)
+    update.message.reply_text(text)
+
+def mediafire():
+    """Send a message when the command /mediafire is issued."""
+    temp = mediaFireDownload()
+    text = "Download link is here {}".format(temp)
     update.message.reply_text(text)
 
 def domain_expiration_date(update, context):
@@ -98,6 +112,8 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("pttest", pttest))
+    dp.add_handler(CommandHandler("mediafire", mediafire))
+
 
     # log all errors
     dp.add_error_handler(error)
