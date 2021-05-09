@@ -66,7 +66,7 @@ def pttest(update, context):
     text = "The date of next examination of ICAI Pttest is {}".format(temp)
     update.message.reply_text(text)
 
-def mediafire():
+def mediafire(update, context):
     """Send a message when the command /mediafire is issued."""
     temp = mediaFireDownload()
     text = "Download link is here {}".format(temp)
