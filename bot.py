@@ -6,11 +6,9 @@ import json
 import whois
 import datetime
 import time
-#pttest scrape date of examination
 import re
 import requests as r
 from bs4 import BeautifulSoup
-#pttest end
 
 PORT = int(os.environ.get('PORT', 5000))
 
@@ -31,16 +29,14 @@ def pttest_scrape():
     data = soup.find_all("div", {"class": "candidate-advise-details"})[0].find_all('p')[1].text
     return data
 
-def mediaFireDownload():
-    link = "http://www.mediafire.com/file/v155o0i1n5frt86/Mecha_Cue_Set_Offers_Backup_By_Abdullah_xD.zip/file"
+def mediaFireDownload(item):
     header = {
     'UserAgent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'
     }
-    content = r.get(link, headers=header)
+    content = r.get(item, headers=header)
     soup = BeautifulSoup(content.text, "html.parser")
     download_link = soup.find_all("a", {"class": "input popsok"})
     return download_link[0]['href']
-
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -68,9 +64,17 @@ def pttest(update, context):
 
 def mediafire(update, context):
     """Send a message when the command /mediafire is issued."""
-    temp = mediaFireDownload()
-    text = "Download link is here {}".format(temp)
-    update.message.reply_text(text)
+    data_split = list(update.message.text[11:].split(' '))
+    print(len(data_split))
+    print(data_split)
+
+    for item in data_split:
+        time.sleep(2)
+        temp = mediaFireDownload(item)
+        text = "Download link is here {}".format(temp)
+        update.message.reply_text(text)
+        print(item)
+
 
 def domain_expiration_date(update, context):
     def myconverter(o):
